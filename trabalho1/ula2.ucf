@@ -1,0 +1,10 @@
+
+# PlanAhead Generated physical constraints 
+
+NET "Operator1" LOC = U8;
+NET "Output" LOC = V20;
+
+# PlanAhead Generated IO constraints 
+
+NET "Operator1" IOSTANDARD = LVCMOS33;
+NET "Output" IOSTANDARD = LVCMOS33;

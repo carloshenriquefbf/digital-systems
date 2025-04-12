@@ -1,0 +1,9 @@
+//! **************************************************************************
+// Written by: Map P.20131013 on Tue Apr 08 14:56:57 2025
+//! **************************************************************************
+
+SCHEMATIC START;
+COMP "Output" LOCATE = SITE "V20" LEVEL 1;
+COMP "Operator1" LOCATE = SITE "U8" LEVEL 1;
+SCHEMATIC END;
+
