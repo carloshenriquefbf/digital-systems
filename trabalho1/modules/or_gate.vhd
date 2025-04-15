@@ -29,12 +29,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity nand_gate is
+entity or_gate is
     Port ( a, b : in  STD_LOGIC_VECTOR(3 downto 0);
            saida : out  STD_LOGIC_VECTOR(3 downto 0));
-end nand_gate;
+end or_gate;
 
-architecture Behavioral of nand_gate is
+architecture Behavioral of or_gate is
 
 begin
 
