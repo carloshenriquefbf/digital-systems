@@ -32,20 +32,31 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity debouncer is
     Port ( clock : in  STD_LOGIC;
-           entrada : in  STD_LOGIC;
-           saida : out  STD_LOGIC);
+           input_switch : in  STD_LOGIC;
+           output_switch : out  STD_LOGIC);
 end debouncer;
 
 architecture Behavioral of debouncer is
-    --TODO: add signals
+    signal count : integer range 0 to 125000;
+    signal switch_state : std_logic;
 begin
-
     process(clock)
-    begin
         if rising_edge(clock) then
-            --TODO: add debouncer logic
+
+            if (input_switch /= switch_state and count < 125000) then
+                count <= count + 1;
+
+            elsif count = 125000 then
+                switch_state <= input_switch;
+
+            else
+                count <= 0;
+
+            end if;
         end if;
     end process;
+
+    output_switch <= switch_state;
 
 end Behavioral;
 
