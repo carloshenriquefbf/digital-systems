@@ -1,6 +1,0 @@
-xst -intstyle ise -ifn "/home/sd/Documents/ula2/ula2.xst" -ofn "/home/sd/Documents/ula2/ula2.syr" 
-ngdbuild -intstyle ise -dd _ngo -nt timestamp -uc ula2.ucf -p xc3s700an-fgg484-5 ula2.ngc ula2.ngd  
-map -intstyle ise -p xc3s700an-fgg484-5 -cm area -ir off -pr off -c 100 -o ula2_map.ncd ula2.ngd ula2.pcf 
-par -w -intstyle ise -ol high -t 1 ula2_map.ncd ula2.ncd ula2.pcf 
-trce -intstyle ise -v 3 -s 5 -n 3 -fastpaths -xml ula2.twx ula2.ncd -o ula2.twr ula2.pcf -ucf ula2.ucf 
-bitgen -intstyle ise -f ula2.ut ula2.ncd 
