@@ -41,17 +41,14 @@ architecture Behavioral of debouncer is
     signal switch_state : std_logic;
 begin
     process(clock)
+	 begin
         if rising_edge(clock) then
-
             if (input_switch /= switch_state and count < 125000) then
                 count <= count + 1;
-
             elsif count = 125000 then
                 switch_state <= input_switch;
-
             else
                 count <= 0;
-
             end if;
         end if;
     end process;

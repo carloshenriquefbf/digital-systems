@@ -31,9 +31,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity ula is
     Port ( OperatorA_in, OperatorB_in, Selector_in : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-           Result_out : OUT STD_LOGIC_VECTOR( 3 DOWNTO 0);
+           Result_out : OUT STD_LOGIC_VECTOR( 3 DOWNTO 0));
            --Zero, Negative, Carry_out, Overflow
-           Flag_out : OUT STD_LOGIC_VECTOR( 3 DOWNTO 0));
+           --Flag_out : OUT STD_LOGIC_VECTOR( 3 DOWNTO 0));
 end ula;
 
 architecture Behavioral of ula is
