@@ -33,5 +33,10 @@ The testbench is in the `modules` folder under the name `tb_main.vhd`.
 6. Run the simulation (Run > Run -All).
 7. View waveforms (Add Wave and check signals). In order to add the input signals, you must have `tb_main` selected. In order to add the output signals, you must have `ula_inst` selected.
 
-![QuestaSim](./misc/questa.png)
+The testbench will generate different inputs for the 'A', 'B' and 'Selector' operators. The testbench will also generate the expected output for each operation as a signal, which can be visualized in the waveform.
+
+![QuestaSim1](./misc/sim1.png)
+
+![QuestaSim2](./misc/sim2.png)
+
 
