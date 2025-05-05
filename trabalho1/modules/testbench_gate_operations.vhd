@@ -2,16 +2,17 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity tb_main is
-end tb_main;
+entity testbench_gate_operations is
+end testbench_gate_operations;
 
-architecture Behavioral of tb_main is
+architecture Behavioral of testbench_gate_operations is
 
     component main
         Port (
             Input_in : in STD_LOGIC_VECTOR(3 downto 0);
             Output_out : out STD_LOGIC_VECTOR(3 downto 0);
-            OperatorA_button_in, OperatorB_button_in, Selector_button_in, Reset_button_in : in STD_LOGIC
+            OperatorA_button_in, OperatorB_button_in, Selector_button_in, Reset_button_in : in STD_LOGIC;
+            Zero_flag_out, Negative_flag_out, Carry_flag_out, Overflow_flag_out : out STD_LOGIC
         );
     end component;
 
@@ -19,6 +20,7 @@ architecture Behavioral of tb_main is
     signal Input_in : STD_LOGIC_VECTOR(3 downto 0) := "0000";
     signal Output_out : STD_LOGIC_VECTOR(3 downto 0);
     signal OperatorA_button, OperatorB_button, Selector_button, Reset_button : STD_LOGIC := '0';
+    signal Zero_flag, Negative_flag, Carry_flag, Overflow_flag : STD_LOGIC;
 
 begin
 
@@ -29,7 +31,11 @@ begin
             OperatorA_button_in => OperatorA_button,
             OperatorB_button_in => OperatorB_button,
             Selector_button_in => Selector_button,
-            Reset_button_in => Reset_button
+            Reset_button_in => Reset_button,
+            Zero_flag_out => Zero_flag,
+            Negative_flag_out => Negative_flag,
+            Carry_flag_out => Carry_flag,
+            Overflow_flag_out => Overflow_flag
         );
 
         stim_proc: process
@@ -113,7 +119,7 @@ begin
 
         Input_in <= "0110";
         Selector_button <= '1'; wait for 100 ns; Selector_button <= '0'; wait for 200 ns;
-        -- Expecting XNOR operation: 0110 XNOR 1100 = 0010
+        -- Expecting XNOR operation: 0110 XNOR 1100 = 0101
 
         -- Reset the buttons
         Reset_button <= '1'; wait for 100 ns; Reset_button <= '0'; wait for 100 ns;

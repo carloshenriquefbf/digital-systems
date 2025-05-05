@@ -12,31 +12,37 @@ Obs: perhaps you need to change the path to Questa from `c:/intelfpga_standard/2
 
 Create a new project (File > New > Project).
 
-Add your files (main.vhd, ula.vhd, tb_main.vhd).
+Add your files (main.vhd, ula.vhd, testbench_gate_operations.vhd).
 
 Compile all files (Compile > Compile All).
 
-Start simulation (Simulate > Start Simulation), select tb_main.
+Start simulation (Simulate > Start Simulation), select testbench_gate_operations.
 
 Run the simulation (Run > Run -All).
 
 View waveforms (Add Wave and check signals). -->
 Runing Questa:
 
-The testbench is in the `modules` folder under the name `tb_main.vhd`.
+The testbench is in the `modules` folder under the name `testbench_gate_operations.vhd`.
 
 1. Open Questa (comes with Quartus).
 2. Go to File > New > Project.
-3. Add your files (main.vhd, ula.vhd, tb_main.vhd).
+3. Add your files (main.vhd, ula.vhd, testbench_gate_operations.vhd).
 4. Compile all files (Compile > Compile All).
-5. Start simulation (Simulate > Start Simulation), select tb_main. If you don't see the tb_main, go to the `work` folder and open the `tb_main` file.
+5. Start simulation (Simulate > Start Simulation), select testbench_gate_operations. If you don't see the testbench_gate_operations, go to the `work` folder and open the `testbench_gate_operations` or the `testbench_arithmetic_operations` file.
 6. Run the simulation (Run > Run -All).
-7. View waveforms (Add Wave and check signals). In order to add the input signals, you must have `tb_main` selected. In order to add the output signals, you must have `ula_inst` selected.
+7. View waveforms (Add Wave and check signals). In order to add the input signals, you must have the testbench file selected. In order to add the output signals, you must have `ula_inst` selected.
 
-The testbench will generate different inputs for the 'A', 'B' and 'Selector' operators. The testbench will also generate the expected output for each operation as a signal, which can be visualized in the waveform.
+The testbench will generate different inputs for the 'A', 'B' and 'Selector' operators. The testbench will also generate the expected output for each operation as a signal, which can be visualized in the waveform. The flags for Zero, Overflow and Carry are also present.
+
+# Simulating gate opereations:
 
 ![QuestaSim1](./misc/sim1.png)
 
 ![QuestaSim2](./misc/sim2.png)
 
+# Simulating arithmetic operations:
 
+![QuestaSim3](./misc/sim3.png)
+
+![QuestaSim4](./misc/sim4.png)
