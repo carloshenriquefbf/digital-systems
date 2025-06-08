@@ -43,9 +43,9 @@ entity modified_lcd is
 		ext_cmds      : in  std_logic_vector(9 downto 0);
 		cmd_select    : in  std_logic_vector(3 downto 0)		-- Selects the command to be written to the LCD);
 	);
-end lcd;
+end modified_lcd;
 
-architecture Behavioral of lcd is
+architecture Behavioral of modified_lcd is
 
 ------------------------------------------------------------------
 --  Component Declarations
@@ -111,7 +111,7 @@ architecture Behavioral of lcd is
 
 	--------- NEW SIGNALS -----------
 	type LCD_CMDS_T is array(integer range <>) of std_logic_vector(9 downto 0);
-	signal lcd_cmds : LCD_CMDS_T(0 to 13) := (
+	signal lcd_cmds : LCD_CMDS_T(0 to 15) := (
 		0 => "00"&X"3C",  -- Function Set
 		1 => "00"&X"0C",  -- Display ON
 		2 => "00"&X"01",  -- Clear Display
@@ -121,14 +121,14 @@ architecture Behavioral of lcd is
 	);
 
 
-	signal lcd_cmd_ptr : integer range 0 to lcd_cmd'HIGH + 1 := 0;
+	signal lcd_cmd_ptr : integer range 0 to lcd_cmds'HIGH + 1 := 0;
 begin
  	--------- NEW PROCESS ---------
 	 process(oneUSClk)
 	 begin
 		 if rising_edge(oneUSClk) then
-			 if cmd_select <= 13 then
-				 lcd_cmds(to_integer(unsigned(cmd_select))) <= ext_cmds;
+			 if cmd_select <= 15 then
+				 lcd_cmds(CONV_INTEGER(cmd_select)) <= ext_cmds;
 			 end if;
 		 end if;
 	 end process;
@@ -156,7 +156,7 @@ begin
 		end process;
 
 	--This goes high when all commands have been run
-	writeDone <= '1' when (lcd_cmd_ptr = lcd_cmd'HIGH)
+	writeDone <= '1' when (lcd_cmd_ptr = lcd_cmds'HIGH)
 		else '0';
 	--rdone <= '1' when stCur = stWait else '0';
 	--Increments the pointer so the statemachine goes through the commands
@@ -209,26 +209,26 @@ begin
 					else
 						stNext <= stPowerOn_Delay;
 					end if;
-					RS <= lcd_cmd(lcd_cmd_ptr)(9);
-					RW <= lcd_cmd(lcd_cmd_ptr)(8);
-					LCD_DB <= lcd_cmd(lcd_cmd_ptr)(7 downto 0);
+					RS <= lcd_cmds(lcd_cmd_ptr)(9);
+					RW <= lcd_cmds(lcd_cmd_ptr)(8);
+					LCD_DB <= lcd_cmds(lcd_cmd_ptr)(7 downto 0);
 					activateW <= '0';
 
 				-- This issuse the function set to the LCD as follows
 				-- 8 bit data length, 2 lines, font is 5x8.
 				when stFunctionSet =>
-					RS <= lcd_cmd(lcd_cmd_ptr)(9);
-					RW <= lcd_cmd(lcd_cmd_ptr)(8);
-					LCD_DB <= lcd_cmd(lcd_cmd_ptr)(7 downto 0);
+					RS <= lcd_cmds(lcd_cmd_ptr)(9);
+					RW <= lcd_cmds(lcd_cmd_ptr)(8);
+					LCD_DB <= lcd_cmds(lcd_cmd_ptr)(7 downto 0);
 					activateW <= '1';
 					stNext <= stFunctionSet_Delay;
 
 				--Gives the proper delay of 37us between the function set and
 				--the display control set.
 				when stFunctionSet_Delay =>
-					RS <= lcd_cmd(lcd_cmd_ptr)(9);
-					RW <= lcd_cmd(lcd_cmd_ptr)(8);
-					LCD_DB <= lcd_cmd(lcd_cmd_ptr)(7 downto 0);
+					RS <= lcd_cmds(lcd_cmd_ptr)(9);
+					RW <= lcd_cmds(lcd_cmd_ptr)(8);
+					LCD_DB <= lcd_cmds(lcd_cmd_ptr)(7 downto 0);
 					activateW <= '0';
 					if delayOK = '1' then
 						stNext <= stDisplayCtrlSet;
@@ -239,18 +239,18 @@ begin
 				--Issuse the display control set as follows
 				--Display ON,  Cursor OFF, Blinking Cursor OFF.
 				when stDisplayCtrlSet =>
-					RS <= lcd_cmd(lcd_cmd_ptr)(9);
-					RW <= lcd_cmd(lcd_cmd_ptr)(8);
-					LCD_DB <= lcd_cmd(lcd_cmd_ptr)(7 downto 0);
+					RS <= lcd_cmds(lcd_cmd_ptr)(9);
+					RW <= lcd_cmds(lcd_cmd_ptr)(8);
+					LCD_DB <= lcd_cmds(lcd_cmd_ptr)(7 downto 0);
 					activateW <= '1';
 					stNext <= stDisplayCtrlSet_Delay;
 
 				--Gives the proper delay of 37us between the display control set
 				--and the Display Clear command.
 				when stDisplayCtrlSet_Delay =>
-					RS <= lcd_cmd(lcd_cmd_ptr)(9);
-					RW <= lcd_cmd(lcd_cmd_ptr)(8);
-					LCD_DB <= lcd_cmd(lcd_cmd_ptr)(7 downto 0);
+					RS <= lcd_cmds(lcd_cmd_ptr)(9);
+					RW <= lcd_cmds(lcd_cmd_ptr)(8);
+					LCD_DB <= lcd_cmds(lcd_cmd_ptr)(7 downto 0);
 					activateW <= '0';
 					if delayOK = '1' then
 						stNext <= stDisplayClear;
@@ -260,18 +260,18 @@ begin
 
 				--Issues the display clear command.
 				when stDisplayClear	=>
-					RS <= lcd_cmd(lcd_cmd_ptr)(9);
-					RW <= lcd_cmd(lcd_cmd_ptr)(8);
-					LCD_DB <= lcd_cmd(lcd_cmd_ptr)(7 downto 0);
+					RS <= lcd_cmds(lcd_cmd_ptr)(9);
+					RW <= lcd_cmds(lcd_cmd_ptr)(8);
+					LCD_DB <= lcd_cmds(lcd_cmd_ptr)(7 downto 0);
 					activateW <= '1';
 					stNext <= stDisplayClear_Delay;
 
 				--Gives the proper delay of 1.52ms between the clear command
 				--and the state where you are clear to do normal operations.
 				when stDisplayClear_Delay =>
-					RS <= lcd_cmd(lcd_cmd_ptr)(9);
-					RW <= lcd_cmd(lcd_cmd_ptr)(8);
-					LCD_DB <= lcd_cmd(lcd_cmd_ptr)(7 downto 0);
+					RS <= lcd_cmds(lcd_cmd_ptr)(9);
+					RW <= lcd_cmds(lcd_cmd_ptr)(8);
+					LCD_DB <= lcd_cmds(lcd_cmd_ptr)(7 downto 0);
 					activateW <= '0';
 					if delayOK = '1' then
 						stNext <= stInitDne;
@@ -282,24 +282,24 @@ begin
 				--State for normal operations for displaying characters, changing the
 				--Cursor position etc.
 				when stInitDne =>
-					RS <= lcd_cmd(lcd_cmd_ptr)(9);
-					RW <= lcd_cmd(lcd_cmd_ptr)(8);
-					LCD_DB <= lcd_cmd(lcd_cmd_ptr)(7 downto 0);
+					RS <= lcd_cmds(lcd_cmd_ptr)(9);
+					RW <= lcd_cmds(lcd_cmd_ptr)(8);
+					LCD_DB <= lcd_cmds(lcd_cmd_ptr)(7 downto 0);
 					activateW <= '0';
 					stNext <= stActWr;
 
 				when stActWr =>
-					RS <= lcd_cmd(lcd_cmd_ptr)(9);
-					RW <= lcd_cmd(lcd_cmd_ptr)(8);
-					LCD_DB <= lcd_cmd(lcd_cmd_ptr)(7 downto 0);
+					RS <= lcd_cmds(lcd_cmd_ptr)(9);
+					RW <= lcd_cmds(lcd_cmd_ptr)(8);
+					LCD_DB <= lcd_cmds(lcd_cmd_ptr)(7 downto 0);
 					activateW <= '1';
 					stNext <= stCharDelay;
 
 				--Provides a max delay between instructions.
 				when stCharDelay =>
-					RS <= lcd_cmd(lcd_cmd_ptr)(9);
-					RW <= lcd_cmd(lcd_cmd_ptr)(8);
-					LCD_DB <= lcd_cmd(lcd_cmd_ptr)(7 downto 0);
+					RS <= lcd_cmds(lcd_cmd_ptr)(9);
+					RW <= lcd_cmds(lcd_cmd_ptr)(8);
+					LCD_DB <= lcd_cmds(lcd_cmd_ptr)(7 downto 0);
 					activateW <= '0';
 					if delayOK = '1' then
 						stNext <= stInitDne;

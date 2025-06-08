@@ -27,7 +27,7 @@ architecture Behavioral of main is
     signal kb_buf_empty : std_logic;
 
     -- Game interface signals
-    signal display_word : std_logic_vector(47 downto 0);  -- 6 ASCII characters
+    signal display_word : std_logic_vector(63 downto 0);  -- 8 ASCII characters
     signal errors       : std_logic_vector(3 downto 0);
     signal game_over    : std_logic;
     signal game_won     : std_logic;
@@ -38,7 +38,7 @@ architecture Behavioral of main is
     signal lcd_cmd_ptr    : unsigned(3 downto 0) := (others => '0');
 
     -- LCD command buffer
-    type lcd_cmds_t is array(0 to 13) of std_logic_vector(9 downto 0);
+    type lcd_cmds_t is array(0 to 15) of std_logic_vector(9 downto 0);
     signal lcd_cmds : lcd_cmds_t := (
         0 => "00"&X"3C",  -- Function Set
         1 => "00"&X"0C",  -- Display ON
@@ -51,11 +51,13 @@ architecture Behavioral of main is
         7 => "10"&X"2A",
         8 => "10"&X"2A",
         9 => "10"&X"2A",
+        10 => "10"&X"2A",
+        11 => "10"&X"2A",
         -- Error counter display
-        10 => "10"&X"45", -- 'E'
-        11 => "10"&X"3A", -- ':'
-        12 => "10"&X"30", -- '0' (initial errors)
-        13 => "00"&X"80"  -- Move cursor to start
+        12 => "10"&X"45", -- 'E'
+        13 => "10"&X"3A", -- ':'
+        14 => "10"&X"30", -- '0' (initial errors)
+        15 => "00"&X"80"  -- Move cursor to start
     );
 
 begin
@@ -83,7 +85,7 @@ begin
     -- Hangman Game Core
     game_engine: entity work.hangman_game
     generic map (
-        WORD_LENGTH => 6,
+        WORD_LENGTH => 8,
         MAX_ERRORS  => 7
     )
     port map (
@@ -118,33 +120,30 @@ begin
             lcd_cmd_select <= (others => '0');
             lcd_ext_cmds <= (others => '0');
         elsif rising_edge(one_us_clk) then
-            -- Update word display (positions 4-9)
-            lcd_cmds(4) <= "10" & display_word(47 downto 40); -- 1st letter
-            lcd_cmds(5) <= "10" & display_word(39 downto 32); -- 2nd letter
-            lcd_cmds(6) <= "10" & display_word(31 downto 24); -- 3rd letter
-            lcd_cmds(7) <= "10" & display_word(23 downto 16); -- 4th letter
-            lcd_cmds(8) <= "10" & display_word(15 downto 8);  -- 5th letter
-            lcd_cmds(9) <= "10" & display_word(7 downto 0);   -- 6th letter
+            -- Update word display (positions 4-11)
+            lcd_cmds(4) <= "10" & display_word(63 downto 56); -- 1st letter
+            lcd_cmds(5) <= "10" & display_word(55 downto 48); -- 2nd letter
+            lcd_cmds(6) <= "10" & display_word(47 downto 40); -- 3rd letter
+            lcd_cmds(7) <= "10" & display_word(39 downto 32); -- 4th letter
+            lcd_cmds(8) <= "10" & display_word(31 downto 24); -- 5th letter
+            lcd_cmds(9) <= "10" & display_word(23 downto 16); -- 6th letter
+            lcd_cmds(10) <= "10" & display_word(15 downto 8); -- 7th letter
+            lcd_cmds(11) <= "10" & display_word(7 downto 0);  -- 8th letter
 
-            -- Update error count (position 12)
-            lcd_cmds(12) <= "10" & X"3" & errors;
+            -- Update error count (position 14)
+            lcd_cmds(14) <= "10" & X"3" & errors;
 
             -- Game over handling
             if game_over = '1' then
                 if game_won = '1' then
-                    lcd_cmds(10) <= "10"&X"57"; -- 'W'
-                    lcd_cmds(11) <= "10"&X"49"; -- 'I'
-                    lcd_cmds(12) <= "10"&X"4E"; -- 'N'
+                    lcd_cmds(12) <= "10" & X"57"; -- 'W' for Win
                 else
-                    lcd_cmds(10) <= "10"&X"4C"; -- 'L'
-                    lcd_cmds(11) <= "10"&X"4F"; -- 'O'
-                    lcd_cmds(12) <= "10"&X"53"; -- 'S'
-                    lcd_cmds(13) <= "10"&X"45"; -- 'E'
+                    lcd_cmds(12) <= "10" & X"4C"; -- 'L' for Loss
                 end if;
             end if;
 
             -- Cycle through commands to update LCD
-            if lcd_cmd_ptr < 13 then
+            if lcd_cmd_ptr < 15 then
                 lcd_cmd_ptr <= lcd_cmd_ptr + 1;
             else
                 lcd_cmd_ptr <= (others => '0');
