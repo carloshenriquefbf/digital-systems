@@ -5,14 +5,14 @@ use IEEE.NUMERIC_STD.ALL;
 entity main is
     Port (
         clk      : in  std_logic;          -- Main clock (e.g., 50MHz)
-        reset    : in  std_logic;          -- Active-high reset
+        rst      : in  std_logic;          -- Active-high reset
         ps2d     : in  std_logic;          -- PS/2 data line
         ps2c     : in  std_logic;          -- PS/2 clock line
         -- LCD outputs
-        lcd_db   : out std_logic_vector(7 downto 0);
-        lcd_rs   : out std_logic;
-        lcd_rw   : out std_logic;
-        lcd_oe   : out std_logic
+        LCD_DB   : out std_logic_vector(7 downto 0);
+        RS       : out std_logic;
+        RW       : out std_logic;
+        OE       : out std_logic
     );
 end main;
 
@@ -74,7 +74,7 @@ begin
     kb_decoder: entity work.kb_code
     port map (
         clk         => clk,
-        reset       => reset,
+        reset       => rst,
         ps2d        => ps2d,
         ps2c        => ps2c,
         rd_key_code => key_pressed,
@@ -90,7 +90,7 @@ begin
     )
     port map (
         clk          => one_us_clk,
-        reset        => reset,
+        reset        => rst,
         key_pressed  => key_pressed,
         key_code     => key_code,
         display_word => display_word,
@@ -103,19 +103,19 @@ begin
     lcd_controller: entity work.modified_lcd
     port map (
         CLK         => clk,
-        rst         => reset,
-        LCD_DB      => lcd_db,
-        RS          => lcd_rs,
-        RW          => lcd_rw,
-        OE          => lcd_oe,
+        rst         => rst,
+        LCD_DB      => LCD_DB,
+        RS          => RS,
+        RW          => RW,
+        OE          => OE,
         ext_cmds    => lcd_ext_cmds,
         cmd_select  => lcd_cmd_select
     );
 
     -- LCD Command Update Process
-    process(one_us_clk, reset)
+    process(one_us_clk, rst)
     begin
-        if reset = '1' then
+        if rst = '1' then
             lcd_cmd_ptr <= (others => '0');
             lcd_cmd_select <= (others => '0');
             lcd_ext_cmds <= (others => '0');
