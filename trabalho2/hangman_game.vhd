@@ -12,7 +12,7 @@ entity hangman_game is
         reset        : in  std_logic;
         key_pressed  : in  std_logic;                     -- From keyboard FSM
         key_code     : in  std_logic_vector(7 downto 0);  -- PS/2 scan code
-        display_word : out std_logic_vector(63 downto 0); -- 6 letters (8 bits each)
+        display_word : out std_logic_vector(63 downto 0); -- 8 letters (8 bits each)
         errors       : out std_logic_vector(3 downto 0);  -- Error counter
         game_over    : out std_logic;                     -- 1 = game ended
         game_won     : out std_logic                      -- 1 = player won
@@ -38,21 +38,40 @@ architecture Behavioral of hangman_game is
         return std_logic_vector is
     begin
         case scancode is
-            when X"1E" => return X"46";  -- F
-            when X"1F" => return X"45";  -- E
-            when X"20" => return X"52";  -- R
-            when X"21" => return X"4E";  -- N
-            when X"22" => return X"41";  -- A
-            when X"23" => return X"4E";  -- N
-            when X"24" => return X"44";  -- D
-            when X"25" => return X"41";  -- A
-            when others => return ASTERISK;  -- Default to *
+            when X"1C" => return X"41";  -- A
+            when X"32" => return X"42";  -- B
+            when X"21" => return X"43";  -- C
+            when X"23" => return X"44";  -- D
+            when X"24" => return X"45";  -- E
+            when X"2B" => return X"46";  -- F
+            when X"34" => return X"47";  -- G
+            when X"33" => return X"48";  -- H
+            when X"43" => return X"49";  -- I
+            when X"3B" => return X"4A";  -- J
+            when X"42" => return X"4B";  -- K
+            when X"4B" => return X"4C";  -- L
+            when X"3A" => return X"4D";  -- M
+            when X"31" => return X"4E";  -- N
+            when X"44" => return X"4F";  -- O
+            when X"4D" => return X"50";  -- P
+            when X"15" => return X"51";  -- Q
+            when X"2D" => return X"52";  -- R
+            when X"1B" => return X"53";  -- S
+            when X"2C" => return X"54";  -- T
+            when X"3C" => return X"55";  -- U
+            when X"2A" => return X"56";  -- V
+            when X"1D" => return X"57";  -- W
+            when X"22" => return X"58";  -- X
+            when X"35" => return X"59";  -- Y
+            when X"1A" => return X"5A";  -- Z
+            when others => return X"00";  -- Invalid
         end case;
     end function;
 
 begin
     process(clk, reset)
         variable letter_found : boolean;
+        variable pressed_ascii : std_logic_vector(7 downto 0);
     begin
         if reset = '1' then
             -- Reset game state
@@ -61,24 +80,30 @@ begin
             guessed <= (others => '0');
             won <= '0';
             lost <= '0';
-        elsif rising_edge(clk) and key_pressed = '1' and won = '0' and lost = '0' then
-            letter_found := false;
+        elsif rising_edge(clk) then
+            if key_pressed = '1' and won = '0' and lost = '0' then
+                letter_found := false;
+                pressed_ascii := scan_to_ascii(key_code);
 
-            -- Check if pressed key matches any letter
-            for i in 0 to WORD_LENGTH-1 loop
-                if key_code = TARGET_WORD(i) and guessed(i) = '0' then
-                    current_word(i) <= scan_to_ascii(key_code);
-                    guessed(i) <= '1';
-                    letter_found := true;
+                -- Only process valid ASCII characters
+                if pressed_ascii /= X"00" then
+                    -- Check if pressed key matches any letter
+                    for i in 0 to WORD_LENGTH-1 loop
+                        if pressed_ascii = TARGET_WORD(i) and guessed(i) = '0' then
+                            current_word(i) <= pressed_ascii;
+                            guessed(i) <= '1';
+                            letter_found := true;
+                        end if;
+                    end loop;
+
+                    -- Handle wrong guess
+                    if not letter_found then
+                        error_count <= error_count + 1;
+                    end if;
                 end if;
-            end loop;
-
-            -- Handle wrong guess
-            if not letter_found then
-                error_count <= error_count + 1;
             end if;
 
-            -- Check win/lose conditions
+            -- Check win/lose conditions (separate from key press)
             if guessed = (guessed'range => '1') then
                 won <= '1';
             elsif error_count >= MAX_ERRORS then

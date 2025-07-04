@@ -25,6 +25,10 @@ architecture Behavioral of main is
     signal key_pressed  : std_logic;
     signal key_code     : std_logic_vector(7 downto 0);
     signal kb_buf_empty : std_logic;
+    signal rd_key_code  : std_logic;  -- NEW: separate read signal
+
+    -- Key press detection
+    signal kb_buf_empty_prev : std_logic := '1';
 
     -- Game interface signals
     signal display_word : std_logic_vector(63 downto 0);  -- 8 ASCII characters
@@ -70,6 +74,27 @@ begin
     end process;
     one_us_clk <= clk_count(5);
 
+    -- Key press detection logic
+    process(one_us_clk, rst)
+    begin
+        if rst = '1' then
+            kb_buf_empty_prev <= '1';
+            key_pressed <= '0';
+            rd_key_code <= '0';
+        elsif rising_edge(one_us_clk) then
+            kb_buf_empty_prev <= kb_buf_empty;
+
+            -- Detect new key arrival (buffer was empty, now has data)
+            if kb_buf_empty_prev = '1' and kb_buf_empty = '0' then
+                key_pressed <= '1';
+                rd_key_code <= '1';  -- Read the key from buffer
+            else
+                key_pressed <= '0';
+                rd_key_code <= '0';
+            end if;
+        end if;
+    end process;
+
     -- Keyboard decoder
     kb_decoder: entity work.kb_code
     port map (
@@ -77,19 +102,18 @@ begin
         reset       => rst,
         ps2d        => ps2d,
         ps2c        => ps2c,
-        rd_key_code => key_pressed,
+        rd_key_code => rd_key_code,
         key_code    => key_code,
         kb_buf_empty => kb_buf_empty
     );
 
-    -- Hangman Game Core
     game_engine: entity work.hangman_game
     generic map (
         WORD_LENGTH => 8,
         MAX_ERRORS  => 7
     )
     port map (
-        clk          => one_us_clk,
+        clk          => clk,
         reset        => rst,
         key_pressed  => key_pressed,
         key_code     => key_code,
