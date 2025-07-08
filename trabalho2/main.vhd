@@ -6,13 +6,22 @@ entity main is
     Port (
         clk      : in  std_logic;          -- Main clock (e.g., 50MHz)
         rst      : in  std_logic;          -- Active-high reset
-        ps2d     : in  std_logic;          -- PS/2 data line
-        ps2c     : in  std_logic;          -- PS/2 clock line
+        data     : in  std_logic;          -- PS/2 data line
+        pclk     : in  std_logic;          -- PS/2 clock line
         -- LCD outputs
         LCD_DB   : out std_logic_vector(7 downto 0);
         RS       : out std_logic;
         RW       : out std_logic;
-        OE       : out std_logic
+        OE       : out std_logic;
+        -- led
+        l1		: out std_logic;
+        l2		: out std_logic;
+        l3		: out std_logic;
+        l4		: out std_logic;
+        l5		: out std_logic;
+        l6		: out std_logic;
+        l7		: out std_logic;
+        l8		: out std_logic
     );
 end main;
 
@@ -22,13 +31,7 @@ architecture Behavioral of main is
     signal one_us_clk   : std_logic;  -- 1MHz clock for timing
 
     -- Keyboard interface signals
-    signal key_pressed  : std_logic;
-    signal key_code     : std_logic_vector(7 downto 0);
-    signal kb_buf_empty : std_logic;
-    signal rd_key_code  : std_logic;  -- NEW: separate read signal
-
-    -- Key press detection
-    signal kb_buf_empty_prev : std_logic := '1';
+    signal key_press     : std_logic_vector(7 downto 0);
 
     -- Game interface signals
     signal display_word : std_logic_vector(63 downto 0);  -- 8 ASCII characters
@@ -74,37 +77,20 @@ begin
     end process;
     one_us_clk <= clk_count(5);
 
-    -- Key press detection logic
-    process(one_us_clk, rst)
-    begin
-        if rst = '1' then
-            kb_buf_empty_prev <= '1';
-            key_pressed <= '0';
-            rd_key_code <= '0';
-        elsif rising_edge(one_us_clk) then
-            kb_buf_empty_prev <= kb_buf_empty;
-
-            -- Detect new key arrival (buffer was empty, now has data)
-            if kb_buf_empty_prev = '1' and kb_buf_empty = '0' then
-                key_pressed <= '1';
-                rd_key_code <= '1';  -- Read the key from buffer
-            else
-                key_pressed <= '0';
-                rd_key_code <= '0';
-            end if;
-        end if;
-    end process;
-
     -- Keyboard decoder
-    kb_decoder: entity work.kb_code
+    kb_decoder: entity work.key
     port map (
-        clk         => clk,
-        reset       => rst,
-        ps2d        => ps2d,
-        ps2c        => ps2c,
-        rd_key_code => rd_key_code,
-        key_code    => key_code,
-        kb_buf_empty => kb_buf_empty
+        data        => data,
+        pclk        => pclk,
+        key_press    => key_press,
+        l1 => l1,
+        l2 => l2,
+        l3 => l3,
+        l4 => l4,
+        l5 => l5,
+        l6 => l6,
+        l7 => l7,
+        l8 => l8
     );
 
     game_engine: entity work.hangman_game
@@ -115,8 +101,7 @@ begin
     port map (
         clk          => clk,
         reset        => rst,
-        key_pressed  => key_pressed,
-        key_code     => key_code,
+        key_code     => key_press,
         display_word => display_word,
         errors       => errors,
         game_over    => game_over,
