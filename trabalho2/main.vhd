@@ -122,13 +122,13 @@ begin
     );
 
     -- LCD Command Update Process
-    process(one_us_clk, rst)
+    process(clk, rst)
     begin
         if rst = '1' then
             lcd_cmd_ptr <= (others => '0');
             lcd_cmd_select <= (others => '0');
             lcd_ext_cmds <= (others => '0');
-        elsif rising_edge(one_us_clk) then
+        elsif rising_edge(clk) then
             -- Update word display (positions 4-11)
             lcd_cmds(4) <= "10" & display_word(63 downto 56); -- 1st letter
             lcd_cmds(5) <= "10" & display_word(55 downto 48); -- 2nd letter
