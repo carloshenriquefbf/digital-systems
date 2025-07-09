@@ -12,7 +12,7 @@ entity hangman_game is
         reset        : in  std_logic;
         key_code     : in  std_logic_vector(7 downto 0);  -- PS/2 scan code
         display_word : out std_logic_vector(63 downto 0); -- 8 letters (8 bits each)
-        errors       : out std_logic_vector(3 downto 0);  -- Error counter
+        errors       : out std_logic_vector(7 downto 0);  -- Error counter
         game_over    : out std_logic;                     -- 1 = game ended
         game_won     : out std_logic                      -- 1 = player won
     );
@@ -24,8 +24,14 @@ architecture Behavioral of hangman_game is
     type word_array is array (0 to WORD_LENGTH-1) of std_logic_vector(7 downto 0);
 
     signal current_word : word_array := (others => ASTERISK);
-    signal error_count  : unsigned(3 downto 0) := (others => '0');
-    signal guessed      : std_logic_vector(WORD_LENGTH-1 downto 0) := (others => '0');
+    signal error_count  : integer := 0;
+	signal error_ascii  : std_logic_vector(7 downto 0);
+    signal guessed_a    : std_logic := '0';
+	signal guessed_f    : std_logic := '0';
+    signal guessed_e    : std_logic := '0';
+    signal guessed_n    : std_logic := '0';
+    signal guessed_d    : std_logic := '0';
+	signal guessed_r    : std_logic := '0';
     signal won          : std_logic := '0';
     signal lost         : std_logic := '0';
 
@@ -33,38 +39,64 @@ begin
     process(clk, reset)
     begin
         if reset = '1' then
-            -- Reset game state
-            current_word <= (others => ASTERISK);
-            error_count <= (others => '0');
-            guessed <= (others => '0');
-            won <= '0';
-            lost <= '0';
-        elsif rising_edge(clk) then
-            if key_code = "00011100" then -- A
-                current_word(4) <= X"41";
+			if guessed_a = '1' then
+		        current_word(4) <= X"41";
 				current_word(7) <= X"41";
-                guessed(4) <= '1';
-                guessed(7) <= '1';
-            elsif key_code = "00100100" then -- E
-                current_word(1) <= X"45";
-                guessed(1) <= '1';
-            elsif key_code = "00101011" then -- F
-                current_word(0) <= X"46";
-                guessed(0) <= '1';
-            elsif key_code = "00110001" then -- N
+			else
+				current_word(4) <= ASTERISK;
+				current_word(7) <= ASTERISK;
+			end if;
+
+			if guessed_e = '1' then
+			    current_word(1) <= X"45";
+			else
+				current_word(1) <= ASTERISK;
+			end if;
+
+			if guessed_f = '1' then
+			    current_word(0) <= X"46";
+			else
+				current_word(0) <= ASTERISK;
+			end if;
+
+            if guessed_n = '1' then
                 current_word(3) <= X"4E";
                 current_word(5) <= X"4E";
-                guessed(3) <= '1';
-                guessed(5) <= '1';
-            elsif key_code = "00101101" then -- R
-                current_word(2) <= X"52";
-                guessed(2) <= '1';
-            elsif key_code /= "00000000" then
-                error_count <= error_count + 1;
+            else
+                current_word(3) <= ASTERISK;
+                current_word(5) <= ASTERISK;
             end if;
+
+            if guessed_d = '1' then
+                current_word(6) <= X"44";
+            else
+                current_word(6) <= ASTERISK;
+            end if;
+
+            if guessed_r = '1' then
+                current_word(2) <= X"52";
+                else
+                current_word(2) <= ASTERISK;
+            end if;
+
+        elsif rising_edge(clk) then
+            if key_code = "00011100" then    -- A
+                guessed_a <= '1';
+            elsif key_code = "00100100" then -- E
+                guessed_e <= '1';
+            elsif key_code = "00101011" then -- F
+                guessed_f <= '1';
+            elsif key_code = "00110001" then -- N
+                guessed_n <= '1';
+            elsif key_code = "00101101" then -- R
+                guessed_r <= '1';
+            elsif key_code = "00100011" then -- D
+                guessed_d <= '1';
+			end if;
+
         end if;
 
-        if guessed = "11111111" then
+        if guessed_a = '1' and guessed_e = '1' and guessed_n = '1' and guessed_r = '1' and guessed_d = '1' and guessed_f = '1' then
             won <= '1';
         end if;
 
@@ -78,8 +110,8 @@ begin
     display_word <= current_word(0) & current_word(1) & current_word(2) &
                     current_word(3) & current_word(4) & current_word(5) &
                     current_word(6) & current_word(7);
-    errors <= std_logic_vector(error_count);
-    game_over <= won or lost;
+    errors <= error_ascii;
+    game_over <= lost;
     game_won <= won;
 
 end Behavioral;

@@ -16,7 +16,7 @@ NET "OE" LOC = AB4;
 NET "RS" LOC = Y14;
 NET "RW" LOC = W13;
 NET "rst" LOC = T15;
-
+NET "rst" CLOCK_DEDICATED_ROUTE = FALSE;
 
 
 NET "data" LOC = V11;
@@ -42,7 +42,7 @@ NET "l8" IOSTANDARD = LVCMOS33;
 NET "pclk" IOSTANDARD = LVCMOS33;
 
 
-# PlanAhead Generated IO constraints 
+# PlanAhead Generated IO constraints
 
 NET "OE" IOSTANDARD = LVCMOS33;
 NET "RS" IOSTANDARD = LVCMOS33;

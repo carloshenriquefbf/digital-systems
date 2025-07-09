@@ -35,7 +35,7 @@ architecture Behavioral of main is
 
     -- Game interface signals
     signal display_word : std_logic_vector(63 downto 0);  -- 8 ASCII characters
-    signal errors       : std_logic_vector(3 downto 0);
+    signal errors       : std_logic_vector(7 downto 0);
     signal game_over    : std_logic;
     signal game_won     : std_logic;
 
@@ -61,9 +61,9 @@ architecture Behavioral of main is
         10 => "10"&X"2A",
         11 => "10"&X"2A",
         -- Error counter display
-        12 => "10"&X"45", -- 'E'
-        13 => "10"&X"3A", -- ':'
-        14 => "10"&X"30", -- '0' (initial errors)
+        12 => "10"&X"2D",
+        13 => "10"&X"2D",
+        14 => "10"&X"2D",
         15 => "00"&X"80"  -- Move cursor to start
     );
 
@@ -140,16 +140,16 @@ begin
             lcd_cmds(11) <= "10" & display_word(7 downto 0);  -- 8th letter
 
             -- Update error count (position 14)
-            lcd_cmds(14) <= "10" & X"3" & errors;
+            --lcd_cmds(14) <= "10" & errors;
 
             -- Game over handling
             if game_over = '1' then
-                if game_won = '1' then
-                    lcd_cmds(12) <= "10" & X"57"; -- 'W' for Win
-                else
-                    lcd_cmds(12) <= "10" & X"4C"; -- 'L' for Loss
-                end if;
+              lcd_cmds(13) <= "10" & X"2A";
             end if;
+
+			if game_won = '1' then
+                lcd_cmds(13) <= "10" & X"57";
+			end if;
 
             -- Cycle through commands to update LCD
             if lcd_cmd_ptr < 15 then
