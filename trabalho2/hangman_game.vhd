@@ -39,7 +39,7 @@ begin
     process(clk, reset)
     begin
         if reset = '1' then
-			if guessed_a = '1' then
+			if guessed_a = '1' then             -- A
 		        current_word(4) <= X"41";
 				current_word(7) <= X"41";
 			else
@@ -47,19 +47,19 @@ begin
 				current_word(7) <= ASTERISK;
 			end if;
 
-			if guessed_e = '1' then
+			if guessed_e = '1' then             -- E
 			    current_word(1) <= X"45";
 			else
 				current_word(1) <= ASTERISK;
 			end if;
 
-			if guessed_f = '1' then
+			if guessed_f = '1' then             -- F
 			    current_word(0) <= X"46";
 			else
 				current_word(0) <= ASTERISK;
 			end if;
 
-            if guessed_n = '1' then
+            if guessed_n = '1' then             -- N
                 current_word(3) <= X"4E";
                 current_word(5) <= X"4E";
             else
@@ -67,13 +67,13 @@ begin
                 current_word(5) <= ASTERISK;
             end if;
 
-            if guessed_d = '1' then
+            if guessed_d = '1' then             -- D
                 current_word(6) <= X"44";
             else
                 current_word(6) <= ASTERISK;
             end if;
 
-            if guessed_r = '1' then
+            if guessed_r = '1' then             -- R
                 current_word(2) <= X"52";
                 else
                 current_word(2) <= ASTERISK;
@@ -92,6 +92,28 @@ begin
                 guessed_r <= '1';
             elsif key_code = "00100011" then -- D
                 guessed_d <= '1';
+            elsif key_code = "00011101" or -- B
+                key_code = "00100001" or   -- C
+                key_code = "00101000" or   -- G
+                key_code = "00100010" or   -- H
+                key_code = "00110000" or   -- I
+                key_code = "00101100" or   -- J
+                key_code = "00110010" or   -- K
+                key_code = "00111010" or   -- L
+                key_code = "00111001" or   -- M
+                key_code = "00110100" or   -- O
+                key_code = "00110101" or   -- P
+                key_code = "00010101" or   -- Q
+                key_code = "00101010" or   -- T
+                key_code = "00111100" or   -- U
+                key_code = "00101001" or   -- V
+                key_code = "00010001" or   -- W
+                key_code = "00100010" or   -- X
+                key_code = "00110101" or   -- Y
+                key_code = "00100001" then -- Z
+
+                error_count <= error_count + 1;
+                error_ascii <= std_logic_vector(to_unsigned(error_count, 8));
 			end if;
 
         end if;

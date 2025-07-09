@@ -140,11 +140,11 @@ begin
             lcd_cmds(11) <= "10" & display_word(7 downto 0);  -- 8th letter
 
             -- Update error count (position 14)
-            --lcd_cmds(14) <= "10" & errors;
+                lcd_cmds(13) <= "10" & errors;
 
             -- Game over handling
             if game_over = '1' then
-              lcd_cmds(13) <= "10" & X"2A";
+                lcd_cmds(13) <= "10" & X"2A";
             end if;
 
 			if game_won = '1' then
