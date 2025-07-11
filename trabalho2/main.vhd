@@ -26,18 +26,12 @@ entity main is
 end main;
 
 architecture Behavioral of main is
-    -- Clock division signals
-    signal clk_count    : std_logic_vector(5 downto 0) := (others => '0');
-    signal one_us_clk   : std_logic;  -- 1MHz clock for timing
-
     -- Keyboard interface signals
     signal key_press     : std_logic_vector(7 downto 0);
 
     -- Game interface signals
     signal display_word : std_logic_vector(63 downto 0);  -- 8 ASCII characters
-    signal errors       : std_logic_vector(7 downto 0);
-    signal game_over    : std_logic;
-    signal game_won     : std_logic;
+    signal game_won     : std_logic := '0';
 
     -- LCD control signals
     signal lcd_ext_cmds   : std_logic_vector(9 downto 0);
@@ -60,7 +54,7 @@ architecture Behavioral of main is
         9 => "10"&X"2A",
         10 => "10"&X"2A",
         11 => "10"&X"2A",
-        -- Error counter display
+        -- Game status display
         12 => "10"&X"2D",
         13 => "10"&X"2D",
         14 => "10"&X"2D",
@@ -68,15 +62,6 @@ architecture Behavioral of main is
     );
 
 begin
-    -- Clock divider process
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            clk_count <= std_logic_vector(unsigned(clk_count) + 1);
-        end if;
-    end process;
-    one_us_clk <= clk_count(5);
-
     -- Keyboard decoder
     kb_decoder: entity work.key
     port map (
@@ -95,17 +80,14 @@ begin
 
     game_engine: entity work.hangman_game
     generic map (
-        WORD_LENGTH => 8,
-        MAX_ERRORS  => 7
+        WORD_LENGTH => 8
     )
     port map (
         clk          => clk,
         reset        => rst,
         key_code     => key_press,
         display_word => display_word,
-        errors       => errors,
-        game_over    => game_over,
-        game_won     => game_won
+        game_won    => game_won
     );
 
     -- LCD Controller
@@ -139,16 +121,9 @@ begin
             lcd_cmds(10) <= "10" & display_word(15 downto 8); -- 7th letter
             lcd_cmds(11) <= "10" & display_word(7 downto 0);  -- 8th letter
 
-            -- Update error count (position 14)
-                lcd_cmds(13) <= "10" & errors;
-
-            -- Game over handling
-            if game_over = '1' then
-                lcd_cmds(13) <= "10" & X"2A";
-            end if;
-
+            -- Update game status
 			if game_won = '1' then
-                lcd_cmds(13) <= "10" & X"57";
+                lcd_cmds(13) <= "10" & X"57"; -- W
 			end if;
 
             -- Cycle through commands to update LCD

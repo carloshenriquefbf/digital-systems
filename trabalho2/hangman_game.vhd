@@ -4,16 +4,13 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity hangman_game is
     generic (
-        WORD_LENGTH : integer := 8;
-        MAX_ERRORS  : integer := 7
+        WORD_LENGTH : integer := 8
     );
     port (
         clk          : in  std_logic;
         reset        : in  std_logic;
         key_code     : in  std_logic_vector(7 downto 0);  -- PS/2 scan code
         display_word : out std_logic_vector(63 downto 0); -- 8 letters (8 bits each)
-        errors       : out std_logic_vector(7 downto 0);  -- Error counter
-        game_over    : out std_logic;                     -- 1 = game ended
         game_won     : out std_logic                      -- 1 = player won
     );
 end hangman_game;
@@ -24,8 +21,6 @@ architecture Behavioral of hangman_game is
     type word_array is array (0 to WORD_LENGTH-1) of std_logic_vector(7 downto 0);
 
     signal current_word : word_array := (others => ASTERISK);
-    signal error_count  : integer := 0;
-	signal error_ascii  : std_logic_vector(7 downto 0);
     signal guessed_a    : std_logic := '0';
 	signal guessed_f    : std_logic := '0';
     signal guessed_e    : std_logic := '0';
@@ -33,7 +28,6 @@ architecture Behavioral of hangman_game is
     signal guessed_d    : std_logic := '0';
 	signal guessed_r    : std_logic := '0';
     signal won          : std_logic := '0';
-    signal lost         : std_logic := '0';
 
 begin
     process(clk, reset)
@@ -92,28 +86,6 @@ begin
                 guessed_r <= '1';
             elsif key_code = "00100011" then -- D
                 guessed_d <= '1';
-            elsif key_code = "00011101" or -- B
-                key_code = "00100001" or   -- C
-                key_code = "00101000" or   -- G
-                key_code = "00100010" or   -- H
-                key_code = "00110000" or   -- I
-                key_code = "00101100" or   -- J
-                key_code = "00110010" or   -- K
-                key_code = "00111010" or   -- L
-                key_code = "00111001" or   -- M
-                key_code = "00110100" or   -- O
-                key_code = "00110101" or   -- P
-                key_code = "00010101" or   -- Q
-                key_code = "00101010" or   -- T
-                key_code = "00111100" or   -- U
-                key_code = "00101001" or   -- V
-                key_code = "00010001" or   -- W
-                key_code = "00100010" or   -- X
-                key_code = "00110101" or   -- Y
-                key_code = "00100001" then -- Z
-
-                error_count <= error_count + 1;
-                error_ascii <= std_logic_vector(to_unsigned(error_count, 8));
 			end if;
 
         end if;
@@ -122,18 +94,12 @@ begin
             won <= '1';
         end if;
 
-        if error_count >= MAX_ERRORS then
-            lost <= '1';
-        end if;
-
     end process;
 
     -- Output assignments
     display_word <= current_word(0) & current_word(1) & current_word(2) &
                     current_word(3) & current_word(4) & current_word(5) &
                     current_word(6) & current_word(7);
-    errors <= error_ascii;
-    game_over <= lost;
     game_won <= won;
 
 end Behavioral;

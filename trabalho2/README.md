@@ -19,3 +19,5 @@ LCD:
 - `original_lcd.vhd`, `lcd.ucf`
 
 In our implementation, we modified the `original_lcd.vhd` to accept external commands. The final version is called `modified_lcd.vhd`.
+
+Additionally, the TA modified the keyboard files to ensure compatibility with the Xilinx boards. The final version is called `key.vhd`.
